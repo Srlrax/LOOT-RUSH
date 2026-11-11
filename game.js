@@ -28,7 +28,8 @@ function saveGame(){
    coins:game.coins,inventory:game.inventory,level:player.level,xp:player.xp,
    health:player.health,maxHealth:player.maxHealth,damage:player.damage,speed:player.speed,
    position:{x:player.root.position.x,z:player.root.position.z},
-   openedChests:chests.map((c,i)=>c.opened?i:null).filter(i=>i!==null)
+   openedChests:chests.map((c,i)=>c.opened?i:null).filter(i=>i!==null),
+   shop:shop.getSaveData()
   }));
  } catch(error) { console.warn('Could not save LOOT RUSH progress.',error); }
 }
@@ -48,10 +49,11 @@ function loadGame(){
   if(Array.isArray(saved.openedChests))saved.openedChests.forEach(i=>{
    const chest=chests[i];if(chest){chest.opened=true;chest.lid.rotation.x=-1.15;chest.lid.position.z=-.28;chest.glow.intensity=0;}
   });
- } catch(error) { console.warn('Could not load LOOT RUSH progress.',error); }
+  return saved;
+ } catch(error) { console.warn('Could not load LOOT RUSH progress.',error); return {}; }
 }
-loadGame();
-const shop=createShop(player,game);
+const savedProgress=loadGame();
+const shop=createShop(player,game,savedProgress);
 
 const keys={forward:false,backward:false,left:false,right:false};
 const keyMap={KeyW:'forward',ArrowUp:'forward',KeyS:'backward',ArrowDown:'backward',KeyA:'left',ArrowLeft:'left',KeyD:'right',ArrowRight:'right'};
@@ -114,13 +116,24 @@ function attack(){
  }
 }
 function onKeyDown(e){
+ const modalOpen=[...document.querySelectorAll('.modal')].some(m=>!m.classList.contains('hidden'));
+ if(e.code==='Escape'){document.querySelectorAll('.modal').forEach(m=>m.classList.add('hidden'));return;}
+ if(modalOpen)return;
  if(keyMap[e.code]){keys[keyMap[e.code]]=true;e.preventDefault();}
  if(e.code==='Space'){e.preventDefault();attack();}
  if(e.code==='KeyE'){interact();}
- if(e.code==='Escape'){document.querySelectorAll('.modal').forEach(m=>m.classList.add('hidden'));}
 }
 function onKeyUp(e){if(keyMap[e.code])keys[keyMap[e.code]]=false;}
 addEventListener('keydown',onKeyDown);addEventListener('keyup',onKeyUp);
+document.querySelectorAll('[data-move]').forEach(button=>{
+ const key=button.dataset.move;
+ const press=e=>{e.preventDefault();keys[key]=true;};
+ const release=e=>{e.preventDefault();keys[key]=false;};
+ button.addEventListener('pointerdown',press);
+ ['pointerup','pointercancel','pointerleave'].forEach(type=>button.addEventListener(type,release));
+});
+document.getElementById('touchAttack')?.addEventListener('pointerdown',e=>{e.preventDefault();attack();});
+document.getElementById('touchInteract')?.addEventListener('pointerdown',e=>{e.preventDefault();interact();});
 addEventListener('blur',()=>Object.keys(keys).forEach(k=>keys[k]=false));
 addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);});
 
