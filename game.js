@@ -21,6 +21,36 @@ player.root.position.set(0,0,3);
 const chests=createChests(scene);
 const enemies=createEnemies(scene);
 const game={coins:0,inventory:[],toast,updateHud};
+const SAVE_KEY='loot-rush-save-v1';
+function saveGame(){
+ try {
+  localStorage.setItem(SAVE_KEY,JSON.stringify({
+   coins:game.coins,inventory:game.inventory,level:player.level,xp:player.xp,
+   health:player.health,maxHealth:player.maxHealth,damage:player.damage,speed:player.speed,
+   position:{x:player.root.position.x,z:player.root.position.z},
+   openedChests:chests.map((c,i)=>c.opened?i:null).filter(i=>i!==null)
+  }));
+ } catch(error) { console.warn('Could not save LOOT RUSH progress.',error); }
+}
+function loadGame(){
+ try {
+  const saved=JSON.parse(localStorage.getItem(SAVE_KEY)||'null');
+  if(!saved)return;
+  game.coins=Number(saved.coins)||0;
+  game.inventory=Array.isArray(saved.inventory)?saved.inventory:[];
+  player.level=Math.max(1,Number(saved.level)||1);
+  player.xp=Math.max(0,Number(saved.xp)||0);
+  player.maxHealth=Math.max(100,Number(saved.maxHealth)||100);
+  player.health=Math.min(player.maxHealth,Math.max(1,Number(saved.health)||player.maxHealth));
+  player.damage=Math.max(1,Number(saved.damage)||20);
+  player.speed=Math.max(1,Number(saved.speed)||6);
+  if(saved.position){player.root.position.set(THREE.MathUtils.clamp(Number(saved.position.x)||0,-47,47),0,THREE.MathUtils.clamp(Number(saved.position.z)||0,-47,47));}
+  if(Array.isArray(saved.openedChests))saved.openedChests.forEach(i=>{
+   const chest=chests[i];if(chest){chest.opened=true;chest.lid.rotation.x=-1.15;chest.lid.position.z=-.28;chest.glow.intensity=0;}
+  });
+ } catch(error) { console.warn('Could not load LOOT RUSH progress.',error); }
+}
+loadGame();
 const shop=createShop(player,game);
 
 const keys={forward:false,backward:false,left:false,right:false};
@@ -41,6 +71,7 @@ function updateHud(){
  document.getElementById('healthText').textContent=Math.ceil(player.health)+' / '+player.maxHealth;
  document.getElementById('healthBar').style.width=(player.health/player.maxHealth*100)+'%';
  shop.refresh();
+ saveGame();
 }
 function addXp(amount){
  player.xp+=amount;
