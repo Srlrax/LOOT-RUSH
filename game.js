@@ -107,7 +107,7 @@ function interact(){
 }
 function attack(){
  if(player.attackCooldown>0)return;
- player.attackCooldown=.55;player.sword.rotation.z=-1.25;
+ player.attackCooldown=.55;player.attackAnim=.34;
  const target=enemies.filter(e=>e.alive&&e.group.position.distanceTo(player.root.position)<3.3).sort((a,b)=>a.group.position.distanceTo(player.root.position)-b.group.position.distanceTo(player.root.position))[0];
  if(target){
   const killed=hitEnemy(target,player.damage);
@@ -125,6 +125,17 @@ function onKeyDown(e){
 }
 function onKeyUp(e){if(keyMap[e.code])keys[keyMap[e.code]]=false;}
 addEventListener('keydown',onKeyDown);addEventListener('keyup',onKeyUp);
+
+// Click the game to capture the mouse. Move the mouse to orbit the camera; press Escape to release it.
+renderer.domElement.addEventListener('click',()=>{
+ if(document.pointerLockElement!==renderer.domElement) renderer.domElement.requestPointerLock?.();
+});
+document.addEventListener('mousemove',e=>{
+ if(document.pointerLockElement!==renderer.domElement)return;
+ player.cameraYaw-=e.movementX*.0035;
+ player.cameraPitch=THREE.MathUtils.clamp(player.cameraPitch+e.movementY*.0025,-.08,.82);
+});
+
 document.querySelectorAll('[data-move]').forEach(button=>{
  const key=button.dataset.move;
  const press=e=>{e.preventDefault();keys[key]=true;};
@@ -140,7 +151,7 @@ addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updat
 function animate(now){
  requestAnimationFrame(animate);
  const dt=Math.min((now-lastTime)/1000,.05);lastTime=now;gameTime+=dt;
- updatePlayer(player,dt,keys,camera,scene);
+ updatePlayer(player,dt,keys,camera);
  updateChests(chests,gameTime);
  updateEnemies(enemies,player,dt);
  nearby=nearestInteractable();
