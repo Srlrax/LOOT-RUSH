@@ -127,7 +127,8 @@ function onKeyUp(e){if(keyMap[e.code])keys[keyMap[e.code]]=false;}
 addEventListener('keydown',onKeyDown);addEventListener('keyup',onKeyUp);
 
 // Click the game to capture the mouse. Move the mouse to orbit the camera; press Escape to release it.
-renderer.domElement.addEventListener('click',()=>{
+document.getElementById('game').addEventListener('click',e=>{
+ if(e.target.closest('button,.modal,a'))return;
  if(document.pointerLockElement!==renderer.domElement) renderer.domElement.requestPointerLock?.();
 });
 document.addEventListener('mousemove',e=>{
