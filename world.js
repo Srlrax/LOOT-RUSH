@@ -27,5 +27,37 @@ export function createWorld(scene) {
   const roof=new THREE.Mesh(new THREE.BoxGeometry(4.8,.25,3.5),new THREE.MeshStandardMaterial({color:0x9a573d}));roof.position.y=3.2;roof.castShadow=true;stall.add(roof);
   const counter=new THREE.Mesh(new THREE.BoxGeometry(3.8,.9,.6),wood);counter.position.set(0,.75,1.1);counter.castShadow=true;stall.add(counter);scene.add(stall);
   const sign=new THREE.Mesh(new THREE.BoxGeometry(2.5,.8,.12),new THREE.MeshStandardMaterial({color:0x283d3d}));sign.position.set(0,2.5,1.55);stall.add(sign);
+  // A worn stone path guides new adventurers from spawn to the trader.
+  const pathStone=new THREE.MeshStandardMaterial({color:0x8b927e,roughness:1});
+  for(let i=0;i<13;i++){
+    for(const side of [-1,1]){
+      const stoneStep=new THREE.Mesh(new THREE.CylinderGeometry(.48,.55,.09,7),pathStone);
+      stoneStep.position.set(side*(.72+(i%3)*.08),.055,2-i*1.15);
+      stoneStep.rotation.y=(i*1.7+side)*.3;
+      stoneStep.receiveShadow=true;scene.add(stoneStep);
+    }
+  }
+  // Small lanterns make the trader outpost easier to spot at dusk.
+  const lanternMat=new THREE.MeshStandardMaterial({color:0x473a2b,metalness:.35,roughness:.65});
+  const lanternGlow=new THREE.PointLight(0xffc66d,1.35,10);
+  for(const x of [-2.8,2.8]){
+    const post=new THREE.Mesh(new THREE.CylinderGeometry(.07,.1,2.1,8),lanternMat);
+    post.position.set(x,1.05,-10.7);post.castShadow=true;scene.add(post);
+    const lamp=new THREE.Mesh(new THREE.SphereGeometry(.19,12,10),new THREE.MeshStandardMaterial({color:0xffd58a,emissive:0xffa52b,emissiveIntensity:1.4}));
+    lamp.position.set(x,2.05,-10.7);scene.add(lamp);
+    const light=lanternGlow.clone();light.position.set(x,2.1,-10.7);scene.add(light);
+  }
+  // Clusters of low plants add detail without crowding the play space.
+  const grassMat=new THREE.MeshStandardMaterial({color:0x456f3e,roughness:1});
+  for(let i=0;i<90;i++){
+    const x=(Math.random()-.5)*105,z=(Math.random()-.5)*105;
+    if(Math.abs(x)<7&&z<2&&z>-18)continue;
+    const tuft=new THREE.Group();tuft.position.set(x,0,z);
+    for(let j=0;j<3;j++){
+      const blade=new THREE.Mesh(new THREE.ConeGeometry(.09,.55,5),grassMat);
+      blade.position.set((j-1)*.12,.25,0);blade.rotation.z=(j-1)*.28;tuft.add(blade);
+    }
+    scene.add(tuft);
+  }
   return {shopPosition:new THREE.Vector3(0,0,-12)};
 }
