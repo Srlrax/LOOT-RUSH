@@ -57,7 +57,7 @@ const shop=createShop(player,game,savedProgress);
 
 const keys={forward:false,backward:false,left:false,right:false};
 const keyMap={KeyW:'forward',ArrowUp:'forward',KeyS:'backward',ArrowDown:'backward',KeyA:'left',ArrowLeft:'left',KeyD:'right',ArrowRight:'right'};
-let nearby=null,gameTime=0,lastTime=performance.now(),toastTimer=0;
+let nearby=null,gameTime=0,lastTime=performance.now(),toastTimer=0,hudTimer=0;
 const clock=new THREE.Clock();
 
 function toast(message){
@@ -108,7 +108,8 @@ function interact(){
 function attack(){
  if(player.attackCooldown>0)return;
  player.attackCooldown=.55;player.attackAnim=.34;
- const target=enemies.filter(e=>e.alive&&e.group.position.distanceTo(player.root.position)<3.3).sort((a,b)=>a.group.position.distanceTo(player.root.position)-b.group.position.distanceTo(player.root.position))[0];
+ const facing=new THREE.Vector3(Math.sin(player.root.rotation.y),0,Math.cos(player.root.rotation.y));
+ const target=enemies.filter(e=>{if(!e.alive)return false;const offset=e.group.position.clone().sub(player.root.position);const d=offset.length();offset.y=0;return d<3.5&&offset.normalize().dot(facing)>.05;}).sort((a,b)=>a.group.position.distanceTo(player.root.position)-b.group.position.distanceTo(player.root.position))[0];
  if(target){
   const killed=hitEnemy(target,player.damage);
   if(killed){const reward=18+Math.floor(Math.random()*13);game.coins+=reward;addXp(35);toast('Enemy defeated! +'+reward+' coins');updateHud();}
@@ -127,8 +128,7 @@ function onKeyUp(e){if(keyMap[e.code])keys[keyMap[e.code]]=false;}
 addEventListener('keydown',onKeyDown);addEventListener('keyup',onKeyUp);
 
 // Click the game to capture the mouse. Move the mouse to orbit the camera; press Escape to release it.
-document.getElementById('game').addEventListener('click',e=>{
- if(e.target.closest('button,.modal,a'))return;
+renderer.domElement.addEventListener('click',()=>{
  if(document.pointerLockElement!==renderer.domElement) renderer.domElement.requestPointerLock?.();
 });
 document.addEventListener('mousemove',e=>{
@@ -155,6 +155,7 @@ function animate(now){
  updatePlayer(player,dt,keys,camera);
  updateChests(chests,gameTime);
  updateEnemies(enemies,player,dt);
+ hudTimer+=dt;if(hudTimer>.12){hudTimer=0;document.getElementById('healthText').textContent=Math.ceil(player.health)+' / '+player.maxHealth;document.getElementById('healthBar').style.width=(player.health/player.maxHealth*100)+'%';}
  nearby=nearestInteractable();
  const prompt=document.getElementById('prompt');
  if(nearby){prompt.classList.remove('hidden');document.getElementById('promptText').textContent=nearby.label;}
