@@ -1,65 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LOOT RUSH</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>LOOT RUSH</title><link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div id="loading"><div class="loader"></div><h1>LOOT RUSH</h1><p>Preparing your adventure...</p></div>
-  <div id="game">
-    <header class="topbar">
-      <a class="brand" href="#"><span class="brand-mark">L</span> LOOT<span>RUSH</span></a>
-      <div class="top-stats">
-        <div class="stat"><span class="stat-icon">◈</span><div><small>COINS</small><b id="coins">0</b></div></div>
-        <div class="stat"><span class="stat-icon level-icon">★</span><div><small>LEVEL</small><b id="level">1</b></div></div>
-      </div>
-      <button id="inventoryBtn" class="top-button">▣ INVENTORY</button>
-    </header>
-
-    <aside class="left-panel">
-      <div class="panel-title">YOUR ADVENTURE</div>
-      <div class="level-line"><span>LEVEL <b id="levelLabel">1</b></span><span id="xpText">0 / 100 XP</span></div>
-      <div class="xp-track"><div id="xpBar"></div></div>
-      <div class="quest-card"><div class="quest-icon">✦</div><div><b>Treasure Hunter</b><p>Find chests and collect rare loot.</p></div></div>
-      <div class="world-label"><span class="pulse"></span> GREENHAVEN PLAINS <small>SAFE ZONE</small></div>
-    </aside>
-
-    <div class="right-controls">
-      <div class="control-hint"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd><span>MOVE</span></div>
-      <div class="control-hint"><kbd>SPACE</kbd><span>ATTACK</span></div>
-      <div class="control-hint"><kbd>E</kbd><span>INTERACT</span></div>
-    </div>
-
-    <div class="mobile-controls" aria-label="Touch controls">
-      <div class="touch-dpad">
-        <button data-move="forward" aria-label="Move forward">▲</button>
-        <div><button data-move="left" aria-label="Move left">◀</button><button data-move="backward" aria-label="Move backward">▼</button><button data-move="right" aria-label="Move right">▶</button></div>
-      </div>
-      <div class="touch-actions"><button id="touchAttack">⚔</button><button id="touchInteract">E</button></div>
-    </div>
-    <div id="prompt" class="interaction-prompt hidden"><kbd>E</kbd><span id="promptText">Open chest</span></div>
-    <div id="toast" class="toast"></div>
-
-    <section id="inventoryPanel" class="modal hidden">
-      <div class="modal-card"><button class="close-btn" data-close="inventoryPanel">×</button><p class="eyebrow">YOUR COLLECTION</p><h2>Inventory</h2><div id="inventoryList" class="inventory-list"></div></div>
-    </section>
-
-    <section id="shopPanel" class="modal hidden">
-      <div class="modal-card shop-card"><button class="close-btn" data-close="shopPanel">×</button><p class="eyebrow">TRADER'S OUTPOST</p><h2>Upgrade Shop</h2><p class="modal-sub">Spend coins to become stronger.</p>
-        <div class="upgrade-row"><div class="upgrade-icon">⚔</div><div class="upgrade-info"><b>Sharp Blade</b><small>Increase your attack damage</small><strong id="damageLevel">Level 1</strong></div><button id="buyDamage" class="buy-button">Upgrade <span>50 ◈</span></button></div>
-        <div class="upgrade-row"><div class="upgrade-icon">♥</div><div class="upgrade-info"><b>Vitality</b><small>Increase your maximum health</small><strong id="healthLevel">Level 1</strong></div><button id="buyHealth" class="buy-button">Upgrade <span>50 ◈</span></button></div>
-        <div class="upgrade-row"><div class="upgrade-icon">➤</div><div class="upgrade-info"><b>Swift Boots</b><small>Move a little faster</small><strong id="speedLevel">Level 1</strong></div><button id="buySpeed" class="buy-button">Upgrade <span>50 ◈</span></button></div>
-      </div>
-    </section>
-
-    <div class="bottom-hud">
-      <div class="health-box"><div class="hud-label">HEALTH <b id="healthText">100 / 100</b></div><div class="health-track"><div id="healthBar"></div></div></div>
-      <div class="hotbar"><div class="hot-slot selected"><span>⚔</span><small>1</small></div><div class="hot-slot"><span>🧪</span><small>2</small></div><div class="hot-slot"><span>▣</span><small>3</small></div></div>
-      <div class="zone-tip">Explore • Find loot • Get stronger</div>
-    </div>
-  </div>
-  <script type="module" src="game.js"></script>
-</body>
-</html>
+<div id="loading"><div class="loader"></div><h1>LOOT RUSH</h1><p>Loading Greenhaven...</p></div>
+<div id="game">
+<header class="topbar"><a class="brand" href="#"><span class="brand-mark">L</span> LOOT<span>RUSH</span></a>
+<div class="top-stats"><div class="stat"><span class="stat-icon">◈</span><div><small>COINS</small><b id="coins">0</b></div></div><div class="stat"><span class="stat-icon">★</span><div><small>LEVEL</small><b id="level">1</b></div></div></div>
+<button id="inventoryBtn" class="top-button">▣ INVENTORY</button></header>
+<aside class="left-panel"><div class="panel-title">YOUR ADVENTURE</div><div class="level-line"><span>LEVEL <b id="levelLabel">1</b></span><span id="xpText">0 / 100 XP</span></div><div class="xp-track"><div id="xpBar"></div></div><div class="quest-card"><div class="quest-icon">✦</div><div><b>Treasure Hunter</b><p>Explore the plains, defeat monsters, and find rare gear.</p></div></div><div class="world-label"><span class="pulse"></span> GREENHAVEN PLAINS <small>ADVENTURE ZONE</small></div></aside>
+<div class="right-controls"><div class="control-hint"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd><span>MOVE</span></div><div class="control-hint"><kbd>MOUSE</kbd><span>LOOK</span></div><div class="control-hint"><kbd>SPACE</kbd><span>ATTACK</span></div><div class="control-hint"><kbd>E</kbd><span>INTERACT</span></div></div>
+<div class="mobile-controls"><div class="touch-dpad"><button data-move="forward">▲</button><div><button data-move="left">◀</button><button data-move="backward">▼</button><button data-move="right">▶</button></div></div><div class="touch-actions"><button id="touchAttack">⚔</button><button id="touchInteract">E</button></div></div>
+<div id="prompt" class="interaction-prompt hidden"><kbd>E</kbd><span id="promptText">Interact</span></div><div id="toast" class="toast"></div>
+<section id="inventoryPanel" class="modal hidden"><div class="modal-card"><button class="close-btn" data-close="inventoryPanel">×</button><p class="eyebrow">YOUR COLLECTION</p><h2>Inventory</h2><div id="inventoryList" class="inventory-list"></div></div></section>
+<section id="shopPanel" class="modal hidden"><div class="modal-card shop-card"><button class="close-btn" data-close="shopPanel">×</button><p class="eyebrow">TRADER'S OUTPOST</p><h2>Upgrade Shop</h2><p class="modal-sub">Spend coins to become stronger.</p>
+<div class="upgrade-row"><div class="upgrade-icon">⚔</div><div class="upgrade-info"><b>Sharp Blade</b><small>Increase attack damage</small><strong id="damageLevel">Level 1</strong></div><button id="buyDamage" class="buy-button">Upgrade <span>50 ◈</span></button></div>
+<div class="upgrade-row"><div class="upgrade-icon">♥</div><div class="upgrade-info"><b>Vitality</b><small>Increase maximum health</small><strong id="healthLevel">Level 1</strong></div><button id="buyHealth" class="buy-button">Upgrade <span>50 ◈</span></button></div>
+<div class="upgrade-row"><div class="upgrade-icon">➤</div><div class="upgrade-info"><b>Swift Boots</b><small>Increase movement speed</small><strong id="speedLevel">Level 1</strong></div><button id="buySpeed" class="buy-button">Upgrade <span>50 ◈</span></button></div>
+</div></section>
+<div class="bottom-hud"><div class="health-box"><div class="hud-label">HEALTH <b id="healthText">100 / 100</b></div><div class="health-track"><div id="healthBar"></div></div></div><div class="hotbar"><div class="hot-slot selected"><span>⚔</span><small>1</small></div><div class="hot-slot"><span>🧪</span><small>2</small></div><div class="hot-slot"><span>▣</span><small>3</small></div></div><div class="zone-tip">Explore • Find loot • Get stronger</div></div>
+</div>
+<script type="module" src="game.js"></script>
+</body></html>
