@@ -1,63 +1,47 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
-
-export function createWorld(scene) {
-  scene.background=new THREE.Color(0x9bc7c8);
-  scene.fog=new THREE.Fog(0x9bc7c8,38,105);
-  const hemi=new THREE.HemisphereLight(0xe5f5ff,0x526c43,2.0);scene.add(hemi);
-  const sun=new THREE.DirectionalLight(0xffe4bd,2.7);sun.position.set(-25,40,20);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);sun.shadow.camera.left=-60;sun.shadow.camera.right=60;sun.shadow.camera.top=60;sun.shadow.camera.bottom=-60;scene.add(sun);
-  const ground=new THREE.Mesh(new THREE.PlaneGeometry(120,120),new THREE.MeshStandardMaterial({color:0x648b53,roughness:1}));ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;scene.add(ground);
-  const patchMat=new THREE.MeshStandardMaterial({color:0x779b5e,roughness:1});
-  for(let i=0;i<24;i++){const x=(Math.random()-.5)*100,z=(Math.random()-.5)*100;const p=new THREE.Mesh(new THREE.CircleGeometry(2+Math.random()*4,24),patchMat);p.rotation.x=-Math.PI/2;p.position.set(x,.012,z);p.scale.y=.6;scene.add(p);}
-  const trunkMat=new THREE.MeshStandardMaterial({color:0x65452f}),leafMats=[0x47764b,0x5c8d52,0x739d59].map(c=>new THREE.MeshStandardMaterial({color:c,roughness:1}));
-  for(let i=0;i<75;i++){
-    const x=(Math.random()-.5)*108,z=(Math.random()-.5)*108;
-    if(Math.abs(x)<9&&Math.abs(z)<9)continue;
-    const tree=new THREE.Group();tree.position.set(x,0,z);
-    const trunk=new THREE.Mesh(new THREE.CylinderGeometry(.18,.28,1.8,7),trunkMat);trunk.position.y=.9;trunk.castShadow=true;tree.add(trunk);
-    const crown=new THREE.Mesh(new THREE.IcosahedronGeometry(.9+Math.random()*.45,1),leafMats[i%3]);crown.position.y=2.25;crown.castShadow=true;tree.add(crown);scene.add(tree);
-  }
-  const rockMat=new THREE.MeshStandardMaterial({color:0x858b83,roughness:1});
-  for(let i=0;i<35;i++){const r=new THREE.Mesh(new THREE.DodecahedronGeometry(.4+Math.random()*.7,0),rockMat);r.position.set((Math.random()-.5)*95,.35,(Math.random()-.5)*95);r.rotation.set(Math.random(),Math.random(),Math.random());r.castShadow=true;scene.add(r);}
-  // Small stone trader outpost
-  const stone=new THREE.MeshStandardMaterial({color:0x9b9b83,roughness:1}),wood=new THREE.MeshStandardMaterial({color:0x765037});
-  const platform=new THREE.Mesh(new THREE.CylinderGeometry(5,5.4,.35,12),stone);platform.position.set(0,.18,-12);platform.receiveShadow=true;scene.add(platform);
-  const stall=new THREE.Group();stall.position.set(0,0,-12);
-  const postGeo=new THREE.BoxGeometry(.18,3,.18);
-  for(const x of [-2.1,2.1])for(const z of [-1.4,1.4]){const p=new THREE.Mesh(postGeo,wood);p.position.set(x,1.7,z);p.castShadow=true;stall.add(p);}
-  const roof=new THREE.Mesh(new THREE.BoxGeometry(4.8,.25,3.5),new THREE.MeshStandardMaterial({color:0x9a573d}));roof.position.y=3.2;roof.castShadow=true;stall.add(roof);
-  const counter=new THREE.Mesh(new THREE.BoxGeometry(3.8,.9,.6),wood);counter.position.set(0,.75,1.1);counter.castShadow=true;stall.add(counter);scene.add(stall);
-  const sign=new THREE.Mesh(new THREE.BoxGeometry(2.5,.8,.12),new THREE.MeshStandardMaterial({color:0x283d3d}));sign.position.set(0,2.5,1.55);stall.add(sign);
-  // A worn stone path guides new adventurers from spawn to the trader.
-  const pathStone=new THREE.MeshStandardMaterial({color:0x8b927e,roughness:1});
-  for(let i=0;i<13;i++){
-    for(const side of [-1,1]){
-      const stoneStep=new THREE.Mesh(new THREE.CylinderGeometry(.48,.55,.09,7),pathStone);
-      stoneStep.position.set(side*(.72+(i%3)*.08),.055,2-i*1.15);
-      stoneStep.rotation.y=(i*1.7+side)*.3;
-      stoneStep.receiveShadow=true;scene.add(stoneStep);
-    }
-  }
-  // Small lanterns make the trader outpost easier to spot at dusk.
-  const lanternMat=new THREE.MeshStandardMaterial({color:0x473a2b,metalness:.35,roughness:.65});
-  const lanternGlow=new THREE.PointLight(0xffc66d,1.35,10);
-  for(const x of [-2.8,2.8]){
-    const post=new THREE.Mesh(new THREE.CylinderGeometry(.07,.1,2.1,8),lanternMat);
-    post.position.set(x,1.05,-10.7);post.castShadow=true;scene.add(post);
-    const lamp=new THREE.Mesh(new THREE.SphereGeometry(.19,12,10),new THREE.MeshStandardMaterial({color:0xffd58a,emissive:0xffa52b,emissiveIntensity:1.4}));
-    lamp.position.set(x,2.05,-10.7);scene.add(lamp);
-    const light=lanternGlow.clone();light.position.set(x,2.1,-10.7);scene.add(light);
-  }
-  // Clusters of low plants add detail without crowding the play space.
-  const grassMat=new THREE.MeshStandardMaterial({color:0x456f3e,roughness:1});
-  for(let i=0;i<90;i++){
-    const x=(Math.random()-.5)*105,z=(Math.random()-.5)*105;
-    if(Math.abs(x)<7&&z<2&&z>-18)continue;
-    const tuft=new THREE.Group();tuft.position.set(x,0,z);
-    for(let j=0;j<3;j++){
-      const blade=new THREE.Mesh(new THREE.ConeGeometry(.09,.55,5),grassMat);
-      blade.position.set((j-1)*.12,.25,0);blade.rotation.z=(j-1)*.28;tuft.add(blade);
-    }
-    scene.add(tuft);
-  }
-  return {shopPosition:new THREE.Vector3(0,0,-12)};
+export function createWorld(scene){
+ scene.background=new THREE.Color(0x91b8c0);scene.fog=new THREE.Fog(0x91b8c0,48,125);
+ scene.add(new THREE.HemisphereLight(0xe8f6ff,0x526448,1.75));
+ const sun=new THREE.DirectionalLight(0xffe5c4,2.5);sun.position.set(-32,48,24);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);sun.shadow.camera.left=-65;sun.shadow.camera.right=65;sun.shadow.camera.top=65;sun.shadow.camera.bottom=-65;sun.shadow.bias=-.0002;scene.add(sun);
+ const mat=(c,r=1,m=0)=>new THREE.MeshStandardMaterial({color:c,roughness:r,metalness:m});
+ const ground=new THREE.Mesh(new THREE.PlaneGeometry(130,130),mat(0x648a51));ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;scene.add(ground);
+ // broad irregular grassland patches
+ const grass=[0x71975b,0x587e49,0x7e9d60,0x698b52].map(c=>mat(c));
+ for(let i=0;i<95;i++){const x=(Math.random()-.5)*116,z=(Math.random()-.5)*116;if(Math.abs(x)<7&&Math.abs(z)<8)continue;const patch=new THREE.Mesh(new THREE.CircleGeometry(1.5+Math.random()*3.7,16),grass[i%grass.length]);patch.rotation.x=-Math.PI/2;patch.position.set(x,.014,z);patch.scale.set(1,.55,.7);scene.add(patch);}
+ // distant rock ridges on the horizon
+ const cliff=mat(0x718078),ridge=mat(0x87918a);
+ for(let i=0;i<17;i++){const a=i/17*Math.PI*2,r=57+Math.random()*8,h=5+Math.random()*8;const rock=new THREE.Mesh(new THREE.DodecahedronGeometry(h*.7,1),i%2?cliff:ridge);rock.position.set(Math.cos(a)*r,h*.35,Math.sin(a)*r);rock.scale.set(1.7,.8,.7);rock.rotation.y=a;rock.castShadow=true;scene.add(rock);}
+ // forest edge with layered trunks and canopies
+ const bark=mat(0x60452f),leaves=[0x315f3e,0x47764a,0x5b8750,0x6b9257].map(c=>mat(c));
+ for(let i=0;i<105;i++){
+  const x=(Math.random()-.5)*112,z=(Math.random()-.5)*112;if(Math.abs(x)<10&&z<5&&z>-22)continue;
+  const tree=new THREE.Group();tree.position.set(x,0,z);
+  const h=2.4+Math.random()*1.5;const trunk=new THREE.Mesh(new THREE.CylinderGeometry(.16,.29,h,8),bark);trunk.position.y=h/2;trunk.castShadow=true;tree.add(trunk);
+  for(let j=0;j<3;j++){const crown=new THREE.Mesh(new THREE.IcosahedronGeometry(.85+Math.random()*.42,1),leaves[(i+j)%4]);crown.position.set((Math.random()-.5)*.5,h*.72+j*.42,(Math.random()-.5)*.5);crown.scale.set(1,1.05,.9);crown.castShadow=true;tree.add(crown);}
+  scene.add(tree);
+ }
+ // rocks and low shrubs
+ const stone=mat(0x858d83),shrub=mat(0x3f713f);
+ for(let i=0;i<75;i++){const x=(Math.random()-.5)*105,z=(Math.random()-.5)*105;if(Math.abs(x)<8&&Math.abs(z)<8)continue;const r=new THREE.Mesh(new THREE.DodecahedronGeometry(.3+Math.random()*.75,0),stone);r.position.set(x,.25,z);r.rotation.set(Math.random(),Math.random(),Math.random());r.castShadow=true;scene.add(r);}
+ for(let i=0;i<125;i++){const x=(Math.random()-.5)*108,z=(Math.random()-.5)*108;if(Math.abs(x)<8&&z<4&&z>-20)continue;const bush=new THREE.Group();bush.position.set(x,0,z);for(let j=0;j<3;j++){const leaf=new THREE.Mesh(new THREE.IcosahedronGeometry(.22+Math.random()*.13,1),shrub);leaf.position.set((j-1)*.22,.25+Math.random()*.12,0);bush.add(leaf);}scene.add(bush);}
+ // Trader courtyard and timber stall
+ const stoneMat=mat(0x9a9b87),wood=mat(0x60412e),trim=mat(0x302b27),roofMat=mat(0x7d4935),gold=mat(0xd6a64d,.45,.5);
+ const platform=new THREE.Mesh(new THREE.CylinderGeometry(6.2,6.6,.38,16),stoneMat);platform.position.set(0,.18,-12);platform.receiveShadow=true;scene.add(platform);
+ const stall=new THREE.Group();stall.position.set(0,0,-12);
+ for(const x of [-2.35,2.35])for(const z of [-1.5,1.5]){const post=new THREE.Mesh(new THREE.BoxGeometry(.2,3.4,.2),wood);post.position.set(x,1.75,z);post.castShadow=true;stall.add(post);}
+ const roof=new THREE.Mesh(new THREE.ConeGeometry(3.5,1.2,4),roofMat);roof.rotation.y=Math.PI/4;roof.position.y=3.65;roof.scale.set(1,.75,.72);roof.castShadow=true;stall.add(roof);
+ const canopy=new THREE.Mesh(new THREE.BoxGeometry(5.1,.18,3.6),wood);canopy.position.y=3.05;stall.add(canopy);
+ const counter=new THREE.Mesh(new THREE.BoxGeometry(4.2,.95,.7),wood);counter.position.set(0,.75,1.12);counter.castShadow=true;stall.add(counter);
+ const sign=new THREE.Mesh(new THREE.BoxGeometry(2.6,.72,.12),trim);sign.position.set(0,2.35,1.58);stall.add(sign);
+ const letters=new THREE.Mesh(new THREE.BoxGeometry(1.45,.08,.035),gold);letters.position.set(0,2.38,1.66);stall.add(letters);
+ // barrels and crates
+ for(const x of [-3.5,3.5]){const barrel=new THREE.Mesh(new THREE.CylinderGeometry(.38,.42,.85,12),wood);barrel.position.set(x,.55,-11.5);barrel.castShadow=true;scene.add(barrel);for(const y of [.3,.75]){const hoop=new THREE.Mesh(new THREE.TorusGeometry(.39,.035,6,16),gold);hoop.rotation.x=Math.PI/2;hoop.position.set(x,y,-11.5);scene.add(hoop);}}
+ for(const x of [-3.7,3.7]){const crate=new THREE.Mesh(new THREE.BoxGeometry(.7,.7,.7),wood);crate.position.set(x,.4,-14.3);crate.rotation.y=.2;crate.castShadow=true;scene.add(crate);}
+ scene.add(stall);
+ // stone path from spawn to trader
+ const path=mat(0xa4a08b);for(let i=0;i<23;i++){const p=new THREE.Mesh(new THREE.CylinderGeometry(.48,.54,.11,7),path);p.position.set((Math.random()-.5)*.35,.06,2-i*.68);p.rotation.y=Math.random()*2; p.receiveShadow=true;scene.add(p);}
+ // lanterns
+ const metal=mat(0x292d2d,.35,.75),flame= new THREE.MeshStandardMaterial({color:0xffd58a,emissive:0xffa32c,emissiveIntensity:2});
+ for(const x of [-3,3]){const post=new THREE.Mesh(new THREE.CylinderGeometry(.075,.12,2.3,8),metal);post.position.set(x,1.15,-10.4);post.castShadow=true;scene.add(post);const bulb=new THREE.Mesh(new THREE.SphereGeometry(.17,12,10),flame);bulb.position.set(x,2.28,-10.4);scene.add(bulb);const light=new THREE.PointLight(0xffbd69,1.4,11);light.position.copy(bulb.position);scene.add(light);}
+ return {shopPosition:new THREE.Vector3(0,0,-12)};
 }
