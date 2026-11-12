@@ -1,113 +1,66 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
 
-export function createPlayer(scene) {
-  const root = new THREE.Group();
-  const armor = new THREE.MeshStandardMaterial({color:0x344b59,roughness:.42,metalness:.38});
-  const bright = new THREE.MeshStandardMaterial({color:0x526d7a,roughness:.38,metalness:.48});
-  const gold = new THREE.MeshStandardMaterial({color:0xe0b45b,metalness:.72,roughness:.26});
-  const dark = new THREE.MeshStandardMaterial({color:0x202b31,roughness:.72});
-  const cloth = new THREE.MeshStandardMaterial({color:0x8b3f32,roughness:.9});
-  const glow = new THREE.MeshStandardMaterial({color:0x8ce4ff,emissive:0x269aca,emissiveIntensity:1.1});
-  const add=(geo,mat,x,y,z,parent=root)=>{const m=new THREE.Mesh(geo,mat);m.position.set(x,y,z);m.castShadow=true;m.receiveShadow=true;parent.add(m);return m;};
-  const box=(w,h,d,mat,x,y,z,parent=root)=>add(new THREE.BoxGeometry(w,h,d),mat,x,y,z,parent);
-  const capsule=(r,l,mat,x,y,z,parent=root)=>add(new THREE.CapsuleGeometry(r,l,5,12),mat,x,y,z,parent);
-  const sphere=(r,mat,x,y,z,parent=root)=>add(new THREE.SphereGeometry(r,20,16),mat,x,y,z,parent);
-
-  // Cape and torso
-  const cape=box(.72,.98,.12,cloth,0,1.12,-.29);cape.rotation.x=-.08;
-  capsule(.31,.48,dark,0,1.24,0);
-  const chest=sphere(.43,armor,0,1.34,0);chest.scale.set(1,.98,.63);
-  box(.53,.42,.075,bright,0,1.39,.235);
-  box(.42,.055,.09,gold,0,1.62,.24);
-  box(.48,.09,.09,gold,0,1.08,.22);
-  sphere(.09,glow,0,1.39,.29);
-
-  // Helmet and visor
-  sphere(.245,armor,0,2.02,0);
-  const crown=add(new THREE.SphereGeometry(.27,24,16,0,Math.PI*2,0,Math.PI*.62),bright,0,2.07,0);
-  box(.48,.075,.34,gold,0,1.99,.025);
-  box(.35,.105,.055,dark,0,1.94,.245);
-  box(.22,.035,.025,glow,0,1.94,.28);
-  for(const s of [-1,1]){const guard=box(.11,.27,.25,armor,s*.235,1.94,0);guard.rotation.z=s*.12;}
-
-  const arms=[],legs=[];
-  for(const s of [-1,1]){
-    const arm=new THREE.Group();arm.position.set(s*.43,1.52,0);root.add(arm);
-    const pauldron=sphere(.18,bright,s*.02,.015,.035,arm);pauldron.scale.set(1,.65,1);
-    capsule(.115,.32,bright,0,-.19,0,arm);
-    box(.23,.065,.22,gold,0,-.36,.015,arm);
-    capsule(.105,.22,armor,0,-.48,.015,arm);
-    sphere(.105,dark,0,-.65,.035,arm);
-    arms.push(arm);
-
-    const leg=new THREE.Group();leg.position.set(s*.19,.86,0);root.add(leg);
-    capsule(.135,.31,dark,0,-.19,0,leg);
-    sphere(.145,bright,0,-.37,.045,leg);
-    capsule(.115,.22,armor,0,-.52,.015,leg);
-    box(.29,.17,.4,dark,0,-.69,.09,leg);
-    box(.28,.045,.36,gold,0,-.61,.09,leg);
-    legs.push(leg);
-  }
-  box(.62,.12,.35,dark,0,.99,0);
-  box(.13,.14,.08,gold,0,.99,.2);
-  box(.16,.19,.18,cloth,-.37,.98,0);
-
-  // Sword is parented to the right hand so the whole arm drives its swing.
-  const sword=new THREE.Group();sword.position.set(0,-.68,.08);arms[1].add(sword);
-  box(.085,.27,.09,dark,0,-.02,0,sword);
-  box(.34,.075,.12,gold,0,.17,0,sword);
-  const blade=box(.105,.72,.045,bright,0,.56,0,sword);blade.rotation.z=-.035;
-  const tip=add(new THREE.ConeGeometry(.075,.18,4),bright,0,1.01,0,sword);tip.rotation.z=Math.PI;
-  box(.14,.06,.11,gold,0,-.12,0,sword);
-
-  scene.add(root);
-  return {root,arms,legs,sword,health:100,maxHealth:100,damage:20,speed:6,attackCooldown:0,hitCooldown:0,xp:0,level:1,walkTime:0,attackAnim:0,cameraYaw:0,cameraPitch:.22};
+export function createPlayer(scene){
+ const root=new THREE.Group();
+ const mat=(color,metalness=.1,roughness=.7)=>new THREE.MeshStandardMaterial({color,metalness,roughness});
+ const steel=mat(0x344e60,.62,.34),edge=mat(0x91a9b4,.72,.28),gold=mat(0xd9a64f,.72,.25),dark=mat(0x202b32,.2,.8),leather=mat(0x713d2e),glow=mat(0x77dcff,.3,.2);
+ const add=(parent,geo,m,x,y,z)=>{const o=new THREE.Mesh(geo,m);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;parent.add(o);return o;};
+ const box=(p,w,h,d,m,x,y,z)=>add(p,new THREE.BoxGeometry(w,h,d),m,x,y,z);
+ const ball=(p,r,m,x,y,z)=>add(p,new THREE.SphereGeometry(r,18,14),m,x,y,z);
+ const capsule=(p,r,l,m,x,y,z)=>add(p,new THREE.CapsuleGeometry(r,l,5,12),m,x,y,z);
+ // boots, legs and belt
+ box(root,.62,.15,.34,dark,0,.91,0);box(root,.55,.13,.34,gold,0,.99,.02);
+ const legs=[],arms=[];
+ for(const s of [-1,1]){
+  const leg=new THREE.Group();leg.position.set(s*.19,.88,0);root.add(leg);legs.push(leg);
+  capsule(leg,.135,.35,steel,0,-.2,0);ball(leg,.145,edge,0,-.39,.02);
+  capsule(leg,.105,.22,dark,0,-.53,.02);box(leg,.29,.16,.4,dark,0,-.68,.1);
+  box(leg,.29,.045,.35,gold,0,-.59,.12);
+ }
+ // torso and layered breastplate
+ const torso=capsule(root,.32,.55,dark,0,1.34,0);torso.scale.set(1.18,1, .8);
+ const chest=add(root,new THREE.SphereGeometry(.38,22,16),steel,0,1.45,.02);chest.scale.set(1,.92,.72);
+ box(root,.54,.38,.09,edge,0,1.43,.245);
+ box(root,.44,.07,.1,gold,0,1.65,.27);box(root,.48,.09,.1,gold,0,1.12,.22);
+ ball(root,.085,glow,0,1.44,.31);
+ // shoulder guards and articulated arms
+ for(const s of [-1,1]){
+  const arm=new THREE.Group();arm.position.set(s*.44,1.57,0);root.add(arm);arms.push(arm);
+  const pauldron=ball(arm,.2,edge,s*.02,0,0);pauldron.scale.set(1,.72,1);
+  capsule(arm,.12,.32,steel,0,-.22,0);ball(arm,.125,dark,0,-.42,.02);
+  capsule(arm,.095,.25,edge,0,-.55,.02);ball(arm,.1,dark,0,-.71,.04);
+  box(arm,.23,.07,.2,gold,0,-.39,.02);
+ }
+ // helmet with glowing visor and crest
+ ball(root,.25,steel,0,2.06,0);
+ const helmetTop=add(root,new THREE.SphereGeometry(.27,20,14,0,Math.PI*2,0,Math.PI*.56),edge,0,2.12,0);
+ box(root,.49,.075,.34,gold,0,2.03,.02);
+ box(root,.35,.105,.06,dark,0,1.98,.245);box(root,.25,.035,.025,glow,0,1.98,.28);
+ for(const s of [-1,1]){const horn=add(root,new THREE.ConeGeometry(.075,.27,7),gold,s*.22,2.24,-.01);horn.rotation.z=s*.5;}
+ // short cloth cape
+ const cape=box(root,.67,.88,.12,leather,0,1.28,-.29);cape.rotation.x=-.1;
+ // sword attached to right hand
+ const sword=new THREE.Group();sword.position.set(0,-.72,.08);arms[1].add(sword);
+ box(sword,.09,.28,.1,dark,0,-.02,0);box(sword,.34,.07,.13,gold,0,.15,0);
+ box(sword,.105,.7,.045,edge,0,.53,0);const tip=add(sword,new THREE.ConeGeometry(.075,.18,4),edge,0,.97,0);tip.rotation.z=Math.PI;
+ scene.add(root);
+ return {root,arms,legs,sword,health:100,maxHealth:100,damage:25,speed:6.7,attackCooldown:0,hitCooldown:0,xp:0,level:1,walkTime:0,attackAnim:0,cameraYaw:0,cameraPitch:.2};
 }
 
-export function updatePlayer(player,dt,input,camera){
-  const yaw=player.cameraYaw;
-  const forward=new THREE.Vector3(Math.sin(yaw),0,-Math.cos(yaw));
-  const right=new THREE.Vector3(Math.cos(yaw),0,Math.sin(yaw));
-  const dir=new THREE.Vector3();
-  if(input.forward)dir.add(forward);
-  if(input.backward)dir.sub(forward);
-  if(input.right)dir.add(right);
-  if(input.left)dir.sub(right);
-  const moving=dir.lengthSq()>.001;
-  if(moving){
-    dir.normalize();
-    const angle=Math.atan2(dir.x,dir.z);
-    player.root.rotation.y=THREE.MathUtils.lerp(player.root.rotation.y,angle,1-Math.exp(-14*dt));
-    player.root.position.addScaledVector(dir,player.speed*dt);
-    player.walkTime+=dt*10;
-  }
-  const stride=moving?Math.sin(player.walkTime):0;
-  const blend=1-Math.exp(-12*dt);
-  player.legs[0].rotation.x=THREE.MathUtils.lerp(player.legs[0].rotation.x,stride*.62,blend);
-  player.legs[1].rotation.x=THREE.MathUtils.lerp(player.legs[1].rotation.x,-stride*.62,blend);
-  player.arms[0].rotation.x=THREE.MathUtils.lerp(player.arms[0].rotation.x,-stride*.32,blend);
-  if(player.attackAnim>0){
-    player.attackAnim=Math.max(0,player.attackAnim-dt);
-    const t=1-player.attackAnim/.34;
-    const swing=Math.sin(Math.min(1,t)*Math.PI);
-    player.arms[1].rotation.x=-1.65*swing;
-    player.arms[1].rotation.z=-.7*swing;
-  }else{
-    player.arms[1].rotation.x=THREE.MathUtils.lerp(player.arms[1].rotation.x,stride*.32,blend);
-    player.arms[1].rotation.z=THREE.MathUtils.lerp(player.arms[1].rotation.z,0,blend);
-  }
-  player.root.position.x=THREE.MathUtils.clamp(player.root.position.x,-47,47);
-  player.root.position.z=THREE.MathUtils.clamp(player.root.position.z,-47,47);
-
-  const distance=7.4*Math.cos(player.cameraPitch);
-  const height=2.0+7.4*Math.sin(player.cameraPitch);
-  const target=new THREE.Vector3(
-    player.root.position.x+Math.sin(yaw)*distance,
-    player.root.position.y+height,
-    player.root.position.z+Math.cos(yaw)*distance
-  );
-  camera.position.lerp(target,1-Math.exp(-10*dt));
-  camera.lookAt(player.root.position.x,player.root.position.y+1.15,player.root.position.z);
-  player.attackCooldown=Math.max(0,player.attackCooldown-dt);
-  player.hitCooldown=Math.max(0,player.hitCooldown-dt);
+export function updatePlayer(p,dt,input,camera){
+ const yaw=p.cameraYaw,forward=new THREE.Vector3(Math.sin(yaw),0,-Math.cos(yaw)),right=new THREE.Vector3(Math.cos(yaw),0,Math.sin(yaw)),dir=new THREE.Vector3();
+ if(input.forward)dir.add(forward);if(input.backward)dir.sub(forward);if(input.right)dir.add(right);if(input.left)dir.sub(right);
+ const moving=dir.lengthSq()>.001,blend=1-Math.exp(-13*dt);
+ if(moving){dir.normalize();const angle=Math.atan2(dir.x,dir.z);p.root.rotation.y=THREE.MathUtils.lerp(p.root.rotation.y,angle,blend);p.root.position.addScaledVector(dir,p.speed*dt);p.walkTime+=dt*10;}
+ const stride=moving?Math.sin(p.walkTime):0;
+ p.legs[0].rotation.x=THREE.MathUtils.lerp(p.legs[0].rotation.x,stride*.62,blend);
+ p.legs[1].rotation.x=THREE.MathUtils.lerp(p.legs[1].rotation.x,-stride*.62,blend);
+ p.arms[0].rotation.x=THREE.MathUtils.lerp(p.arms[0].rotation.x,-stride*.3,blend);
+ if(p.attackAnim>0){p.attackAnim=Math.max(0,p.attackAnim-dt);const t=1-p.attackAnim/.38;const swing=Math.sin(Math.min(1,t)*Math.PI);p.arms[1].rotation.x=-1.8*swing;p.arms[1].rotation.z=-.75*swing;}
+ else{p.arms[1].rotation.x=THREE.MathUtils.lerp(p.arms[1].rotation.x,stride*.3,blend);p.arms[1].rotation.z=THREE.MathUtils.lerp(p.arms[1].rotation.z,0,blend);}
+ p.root.position.x=THREE.MathUtils.clamp(p.root.position.x,-49,49);p.root.position.z=THREE.MathUtils.clamp(p.root.position.z,-49,49);
+ const distance=7.8*Math.cos(p.cameraPitch),height=2.1+7.8*Math.sin(p.cameraPitch);
+ const desired=new THREE.Vector3(p.root.position.x+Math.sin(yaw)*distance,p.root.position.y+height,p.root.position.z+Math.cos(yaw)*distance);
+ camera.position.lerp(desired,1-Math.exp(-9*dt));camera.lookAt(p.root.position.x,p.root.position.y+1.15,p.root.position.z);
+ p.attackCooldown=Math.max(0,p.attackCooldown-dt);p.hitCooldown=Math.max(0,p.hitCooldown-dt);
 }
